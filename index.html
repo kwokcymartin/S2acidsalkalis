@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>S2 Science Revision – Acids & Alkalis (Ch.9)</title>
+  <style>
+    :root { --bg:#0b1220; --card:#121a2b; --text:#e8eefc; --muted:#a8b3d6; --accent:#6ea8fe; --good:#34d399; --bad:#fb7185; }
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:0;background:linear-gradient(180deg,#0b1220,#050814);color:var(--text);}
+    header{padding:18px 16px;border-bottom:1px solid rgba(255,255,255,.08);position:sticky;top:0;background:rgba(11,18,32,.92);backdrop-filter: blur(10px);}
+    h1{font-size:18px;margin:0 0 6px 0;}
+    .sub{font-size:13px;color:var(--muted);margin:0;}
+    main{max-width:980px;margin:0 auto;padding:16px;}
+    .card{background:rgba(18,26,43,.9);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:14px;margin:12px 0;}
+    .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:space-between;}
+    .btn{background:var(--accent);color:#071022;border:0;border-radius:12px;padding:10px 12px;font-weight:700;cursor:pointer;}
+    .btn.secondary{background:transparent;color:var(--text);border:1px solid rgba(255,255,255,.18);}
+    .btn.danger{background:transparent;color:var(--bad);border:1px solid rgba(251,113,133,.45);}
+    .pill{font-size:12px;border:1px solid rgba(255,255,255,.16);border-radius:999px;padding:6px 10px;color:var(--muted);}
+    .q{padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.03);margin:10px 0;}
+    .q h3{font-size:14px;margin:0 0 8px 0;}
+    .opt{display:block;padding:8px 10px;border-radius:10px;border:1px solid rgba(255,255,255,.12);margin:6px 0;cursor:pointer;}
+    .opt input{margin-right:8px;}
+    input[type="text"]{width:min(520px,100%);padding:10px 10px;border-radius:10px;border:1px solid rgba(255,255,255,.16);background:rgba(0,0,0,.25);color:var(--text);}
+    .feedback{margin-top:8px;font-size:13px;color:var(--muted);}
+    .good{color:var(--good);font-weight:700;}
+    .bad{color:var(--bad);font-weight:700;}
+    .grid2{display:grid;grid-template-columns:1fr;gap:10px;}
+    @media (min-width:900px){ .grid2{grid-template-columns:1fr 1fr;} }
+    details{border:1px solid rgba(255,255,255,.10);border-radius:12px;padding:10px;background:rgba(255,255,255,.02);}
+    summary{cursor:pointer;color:var(--muted);font-weight:700;}
+    footer{padding:14px 16px;color:var(--muted);font-size:12px;text-align:center;}
+    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;}
+  </style>
+</head>
+<body>
+<header>
+  <h1>S2 Science – Revision Exercise: Acids & Alkalis (Ch.9)</h1>
+  <p class="sub">30 MCQ (A–D) + 20 short answers • Auto-marking • Easy–Medium • HK S2 Science</p>
+</header>
+
+<main>
+  <section class="card">
+    <div class="row">
+      <div class="pill" id="statsPill">Not started</div>
+      <div class="row">
+        <button class="btn secondary" id="shuffleBtn" type="button">Shuffle questions</button>
+        <button class="btn" id="markBtn" type="button">Mark & show score</button>
+        <button class="btn danger" id="resetBtn" type="button">Reset</button>
+      </div>
+    </div>
+    <p class="sub" style="margin-top:10px;">
+      Tips: For short answers, spelling is not strict but key words must match. Use numbers like <span class="mono">7</span>, <span class="mono">0–14</span>, etc. where needed.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2 style="font-size:16px;margin:0 0 8px 0;">Multiple choice (30 questions)</h2>
+    <div id="mcq"></div>
+  </section>
+
+  <section class="card">
+    <h2 style="font-size:16px;margin:0 0 8px 0;">Short questions (20 questions)</h2>
+    <div id="short"></div>
+  </section>
+
+  <section class="card">
+    <h2 style="font-size:16px;margin:0 0 8px 0;">Results</h2>
+    <div class="grid2">
+      <div class="q">
+        <h3>Score</h3>
+        <div id="scoreBox" class="mono">—</div>
+        <div id="scoreNote" class="feedback"></div>
+      </div>
+      <details>
+        <summary>Show answer key</summary>
+        <div id="keyBox" class="mono" style="white-space:pre-wrap;margin-top:10px;"></div>
+      </details>
+    </div>
+  </section>
+</main>
+
+<footer>
+  Content aligned to common S2 “Acids and Alkalis” topics (properties, indicators, pH, neutralization, reactions, hazards, acid rain) [file:1]
+</footer>
+
+<script>
+/* -----------------------------
+   Data (30 MCQ + 20 Short)
+   ----------------------------- */
+const MCQ = [
+  {q:"Which is a common property of acids?", options:["They feel slippery.","They have a sour taste.","They turn red litmus paper blue.","They have pH greater than 7."], ans:"B", exp:"Acids have a sour taste; do not taste lab acids [file:1]."},
+  {q:"Which is a common property of alkalis?", options:["They have a sour taste.","They have a slippery feel.","They always have pH less than 7.","They turn blue litmus paper blue."], ans:"B", exp:"Alkalis are slippery and bitter; do not taste in lab [file:1]."},
+  {q:"Which pH value shows a neutral substance?", options:["0","7","10","14"], ans:"B", exp:"Neutral substances have pH exactly 7 [file:1]."},
+  {q:"A solution with pH 3 is…", options:["neutral","alkaline","acidic","cannot be determined"], ans:"C", exp:"Acidic substances have pH < 7 [file:1]."},
+  {q:"A solution with pH 12 is…", options:["neutral","alkaline","acidic","distilled water"], ans:"B", exp:"Alkaline substances have pH > 7 [file:1]."},
+  {q:"Which can show how acidic/alkaline a solution is (give a pH value)?", options:["Litmus paper","Universal indicator / pH paper","Only red cabbage extract","Only taste"], ans:"B", exp:"Universal indicator/pH paper gives pH values; litmus only tells acid/alkali [file:1]."},
+  {q:"Blue litmus paper turns red in…", options:["acidic solution","alkaline solution","distilled water","salt solution always"], ans:"A", exp:"Acids turn blue litmus red [file:1]."},
+  {q:"Red litmus paper turns blue in…", options:["acidic solution","alkaline solution","distilled water","all colourless liquids"], ans:"B", exp:"Alkalis turn red litmus blue [file:1]."},
+  {q:"Which is a safety rule when handling acids/alkalis in the lab?", options:["Taste to identify substances.","Wear safety goggles.","Mix chemicals without teacher permission.","Pour waste into the sink always."], ans:"B", exp:"Wear goggles; never taste; follow teacher instructions and proper waste disposal [file:1]."},
+  {q:"If acid/alkali spills on skin, first action is…", options:["Wipe with tissue quickly.","Wash under slow running water (about 10 min).","Add another chemical to neutralize immediately.","Ignore if it does not hurt."], ans:"B", exp:"Wash affected area under slow running water for at least 10 minutes and report to teacher [file:1]."},
+  {q:"Neutralization is a reaction between…", options:["acid and water","acid and metal","acid and alkali","alkali and plastic"], ans:"C", exp:"Acids and alkalis react with each other in neutralization [file:1]."},
+  {q:"Products of neutralization are…", options:["salt and hydrogen","salt and water","water and oxygen","carbon dioxide and water"], ans:"B", exp:"Neutralization produces salt and water, and heat is released [file:1]."},
+  {q:"During neutralization, temperature usually…", options:["falls only","rises (heat released)","stays exactly the same","becomes 0°C"], ans:"B", exp:"Heat is released in neutralization [file:1]."},
+  {q:"Which is an application of neutralization?", options:["Making hydrogen from metals","Preventing tooth decay using toothpaste","Turning limewater milky","Rusting iron"], ans:"B", exp:"Toothpaste is slightly alkaline to neutralize acids in the mouth [file:1]."},
+  {q:"Antacid tablets help because they…", options:["contain acids to digest food","contain alkalis to neutralize excess stomach acid","contain metals to react faster","remove water from the stomach"], ans:"B", exp:"Many antacids contain alkalis that neutralize excess hydrochloric acid [file:1]."},
+  {q:"Bee/ant/mosquito stings are usually…", options:["alkaline; treat with soap","acidic; treat with alkali such as soap","neutral; treat with water only","always carbonic"], ans:"B", exp:"Some insect stings contain acids and can be neutralized by alkalis like soap [file:1]."},
+  {q:"A wasp sting is usually…", options:["acidic; treat with vinegar","alkaline; treat with vinegar","neutral; treat with salt","alkaline; treat with toothpaste only"], ans:"B", exp:"Wasp sting contains alkali and can be neutralized by acids like vinegar [file:1]."},
+  {q:"Which acid is commonly found in vinegar?", options:["carbonic acid","ethanoic acid","sulphuric acid","nitric acid"], ans:"B", exp:"Vinegar contains ethanoic acid [file:1]."},
+  {q:"Which is a common alkali in drain cleaners?", options:["sodium hydroxide","citric acid","carbonic acid","sodium chloride"], ans:"A", exp:"Sodium hydroxide is used in drain cleaners; it is corrosive [file:1]."},
+  {q:"Acids react with some metals to produce…", options:["salt and hydrogen","salt and carbon dioxide","water and oxygen","only heat"], ans:"A", exp:"Acid + metal → salt + hydrogen [file:1]."},
+  {q:"Hydrogen gas can be tested using…", options:["glowing splint relights","burning splint gives pop sound","limewater turns milky","universal indicator turns green"], ans:"B", exp:"Hydrogen burns with a ‘pop’ when tested with a burning splint [file:1]."},
+  {q:"Acids react with calcium carbonate (e.g. marble/limestone) to produce…", options:["salt + carbon dioxide + water","salt + hydrogen","only salt","only carbon dioxide"], ans:"A", exp:"Acid + carbonate → salt + carbon dioxide + water [file:1]."},
+  {q:"Carbon dioxide can be tested by…", options:["burning splint pop sound","limewater turns milky","blue litmus turns red","pH meter reads 7"], ans:"B", exp:"CO₂ turns limewater milky [file:1]."},
+  {q:"Acid rain is mainly caused by gases such as…", options:["oxygen and hydrogen","sulphur dioxide and nitrogen oxides","carbon monoxide and helium","neon and argon"], ans:"B", exp:"SO₂ and nitrogen oxides dissolve in water droplets to form acids, leading to acid rain [file:1]."},
+  {q:"One effect of acid rain is…", options:["makes soil always more alkaline","corrodes metals and damages plants","turns all lakes neutral","stops all bacteria growth"], ans:"B", exp:"Acid rain corrodes metals/buildings, damages plants, and harms aquatic life [file:1]."},
+  {q:"Rainwater is naturally slightly acidic because…", options:["it contains sodium hydroxide","carbon dioxide dissolves to form carbonic acid","it contains ammonia","it contains limestone"], ans:"B", exp:"CO₂ dissolves slightly in rainwater forming carbonic acid; natural pH about 5.6 [file:1]."},
+  {q:"A pH meter is better than pH paper because it…", options:["is always cheaper","gives more accurate readings","cannot be reused","cannot measure dark liquids"], ans:"B", exp:"A pH meter measures pH more accurately and can be reused [file:1]."},
+  {q:"Which statement is correct?", options:["Lower pH means less acidic.","Higher pH means more acidic.","Lower pH means more acidic.","Neutral solutions have pH 0."], ans:"C", exp:"Lower pH = more acidic; higher pH = more alkaline [file:1]."},
+  {q:"Which is TRUE about hazards?", options:["Strong acids/alkalis are less corrosive than weak ones.","Concentrated acids/alkalis are more corrosive.","Household cleaners are always harmless.","Goggles are unnecessary for dilute solutions."], ans:"B", exp:"Strong and/or concentrated acids/alkalis are more corrosive and hazardous [file:1]."}
+];
+
+const SHORT = [
+  {q:"State the pH range of the pH scale.", answers:["0-14","0 to 14","0–14"], exp:"The pH scale runs from 0 to 14 [file:1]."},
+  {q:"What is the pH of a neutral solution?", answers:["7"], exp:"Neutral solutions have pH 7 [file:1]."},
+  {q:"Write the word equation for neutralization.", answers:["acid + alkali -> salt + water","acid alkali -> salt water","acid + alkali → salt + water"], exp:"Neutralization can be written as acid + alkali → salt + water [file:1]."},
+  {q:"Name TWO products formed in neutralization.", answers:["salt and water","water and salt"], exp:"Salt and water are produced in neutralization [file:1]."},
+  {q:"What happens to temperature during neutralization (rise/fall)?", answers:["rise","rises","increase","increases"], exp:"Heat is released, so temperature rises [file:1]."},
+  {q:"What colour does blue litmus turn in an acid?", answers:["red"], exp:"Acid turns blue litmus red [file:1]."},
+  {q:"What colour does red litmus turn in an alkali?", answers:["blue"], exp:"Alkali turns red litmus blue [file:1]."},
+  {q:"Give one example of an acid found at home.", answers:["vinegar","lemon juice","soft drinks","yoghurt","tea","orange juice"], exp:"Many foods/drinks like vinegar (ethanoic acid) contain acids [file:1]."},
+  {q:"Give one example of an alkali found at home.", answers:["soap","baking soda","toothpaste","glass cleaner","kitchen cleaner","drain cleaner"], exp:"Many household products like soap and cleaners contain alkalis [file:1]."},
+  {q:"Name one safety item worn to protect eyes in the lab.", answers:["safety goggles","goggles"], exp:"Safety goggles protect eyes when handling corrosive chemicals [file:1]."},
+  {q:"If acid gets into the eye, what should you do first?", answers:["wash with eye wash","use eye wash bottle","rinse with water","wash with water"], exp:"Wash immediately with eyewash/water for at least ~10 minutes and report to teacher [file:1]."},
+  {q:"Acid + metal produces salt and what gas?", answers:["hydrogen","hydrogen gas"], exp:"Acid reacts with some metals to produce hydrogen [file:1]."},
+  {q:"How do you test for hydrogen gas?", answers:["burning splint pop","pop sound","squeaky pop","lighted splint pop"], exp:"Hydrogen gives a pop sound with a burning splint [file:1]."},
+  {q:"Acid + carbonate produces salt, water and what gas?", answers:["carbon dioxide","carbon dioxide gas","co2"], exp:"Acid + carbonate → salt + carbon dioxide + water [file:1]."},
+  {q:"How do you test for carbon dioxide?", answers:["limewater turns milky","turn limewater milky","limewater milky"], exp:"CO₂ turns limewater milky [file:1]."},
+  {q:"Name TWO gases that cause acid rain.", answers:["sulphur dioxide and nitrogen oxides","sulfur dioxide and nitrogen oxides","so2 and nitrogen oxides","sulphur dioxide, nitrogen oxides"], exp:"SO₂ and nitrogen oxides lead to acids in rain droplets [file:1]."},
+  {q:"State ONE effect of acid rain.", answers:["corrodes metals","damages plants","harms aquatic life","corrodes building materials","water pollution"], exp:"Acid rain corrodes metals/buildings and harms plants/aquatic life [file:1]."},
+  {q:"What is the main purpose of using toothpaste to prevent tooth decay (in one phrase)?", answers:["neutralize acids","neutralise acids","neutralize acid","neutralise acid"], exp:"Toothpaste (slightly alkaline) neutralizes acids in the mouth [file:1]."},
+  {q:"What is the term for the reaction when an acid and an alkali are mixed?", answers:["neutralization","neutralisation"], exp:"This reaction is called neutralization [file:1]."},
+  {q:"A solution with pH 2 is (acidic/alkaline/neutral)?", answers:["acidic","acid"], exp:"pH < 7 is acidic [file:1]."}
+];
+
+/* -----------------------------
+   Rendering
+   ----------------------------- */
+const mcqBox = document.getElementById('mcq');
+const shortBox = document.getElementById('short');
+const scoreBox = document.getElementById('scoreBox');
+const scoreNote = document.getElementById('scoreNote');
+const keyBox = document.getElementById('keyBox');
+const statsPill = document.getElementById('statsPill');
+
+let mcqOrder = [...MCQ.keys()];
+let shortOrder = [...SHORT.keys()];
+
+function renderAll(){
+  mcqBox.innerHTML = '';
+  shortBox.innerHTML = '';
+  scoreBox.textContent = '—';
+  scoreNote.textContent = '';
+  statsPill.textContent = `MCQ: 30 • Short: 20 • Total: 50`;
+
+  mcqOrder.forEach((idx, i) => {
+    const item = MCQ[idx];
+    const id = `mcq_${idx}`;
+    const div = document.createElement('div');
+    div.className = 'q';
+    div.innerHTML = `
+      <h3>MCQ ${i+1}. ${escapeHtml(item.q)}</h3>
+      ${item.options.map((opt, j) => {
+        const letter = String.fromCharCode(65 + j);
+        return `
+          <label class="opt">
+            <input type="radio" name="${id}" value="${letter}">
+            <strong>${letter}.</strong> ${escapeHtml(opt)}
+          </label>`;
+      }).join('')}
+      <div class="feedback" id="${id}_fb"></div>
+    `;
+    mcqBox.appendChild(div);
+  });
+
+  shortOrder.forEach((idx, i) => {
+    const item = SHORT[idx];
+    const id = `short_${idx}`;
+    const div = document.createElement('div');
+    div.className = 'q';
+    div.innerHTML = `
+      <h3>Short ${i+1}. ${escapeHtml(item.q)}</h3>
+      <input type="text" id="${id}" placeholder="Type your answer..." autocomplete="off" />
+      <div class="feedback" id="${id}_fb"></div>
+    `;
+    shortBox.appendChild(div);
+  });
+
+  // Answer key (compact)
+  const mcqKey = mcqOrder.map((idx, i)=> `MCQ ${i+1}: ${MCQ[idx].ans}`).join('\n');
+  const shortKey = shortOrder.map((idx, i)=> `Short ${i+1}: ${SHORT[idx].answers[0]}`).join('\n');
+  keyBox.textContent = mcqKey + "\n\n" + shortKey;
+}
+
+function escapeHtml(s){
+  return (s ?? '').toString()
+    .replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;');
+}
+
+/* -----------------------------
+   Marking
+   ----------------------------- */
+function norm(s){
+  return (s ?? '')
+    .toString()
+    .trim()
+    .toLowerCase()
+    .replaceAll('–','-')
+    .replace(/\s+/g,' ');
+}
+
+function mark(){
+  let mcqCorrect = 0, shortCorrect = 0;
+
+  // MCQ
+  mcqOrder.forEach((idx) => {
+    const item = MCQ[idx];
+    const id = `mcq_${idx}`;
+    const chosen = document.querySelector(`input[name="${id}"]:checked`);
+    const fb = document.getElementById(`${id}_fb`);
+
+    if(!chosen){
+      fb.innerHTML = `<span class="bad">Not answered.</span> Answer: <span class="mono">${item.ans}</span>.`;
+      return;
+    }
+    if(chosen.value === item.ans){
+      mcqCorrect++;
+      fb.innerHTML = `<span class="good">Correct.</span> ${escapeHtml(item.exp)}`;
+    }else{
+      fb.innerHTML = `<span class="bad">Wrong.</span> You chose <span class="mono">${chosen.value}</span>. Answer: <span class="mono">${item.ans}</span>. ${escapeHtml(item.exp)}`;
+    }
+  });
+
+  // Short
+  shortOrder.forEach((idx) => {
+    const item = SHORT[idx];
+    const id = `short_${idx}`;
+    const val = document.getElementById(id).value;
+    const fb = document.getElementById(`${id}_fb`);
+
+    const ok = item.answers.some(a => norm(a) === norm(val));
+    // Also allow "contains" matching for keyword answers (simple tolerance)
+    const ok2 = ok || item.answers.some(a => norm(val).includes(norm(a)) && norm(a).length >= 3);
+
+    if(ok2){
+      shortCorrect++;
+      fb.innerHTML = `<span class="good">Correct.</span> ${escapeHtml(item.exp)}`;
+    }else{
+      fb.innerHTML = `<span class="bad">Not correct.</span> Suggested answer: <span class="mono">${escapeHtml(item.answers[0])}</span>. ${escapeHtml(item.exp)}`;
+    }
+  });
+
+  const total = 50;
+  const score = mcqCorrect + shortCorrect;
+  scoreBox.textContent = `${score}/${total}  (MCQ ${mcqCorrect}/30, Short ${shortCorrect}/20)`;
+
+  if(score >= 45) scoreNote.innerHTML = `<span class="good">Excellent.</span> Ready for unit test-level questions.`;
+  else if(score >= 35) scoreNote.innerHTML = `<span class="good">Good.</span> Review mistakes and redo.`;
+  else scoreNote.innerHTML = `<span class="bad">Keep going.</span> Revisit pH, litmus, and neutralization basics.`;
+
+  statsPill.textContent = `Done • Score: ${score}/${total}`;
+}
+
+/* -----------------------------
+   Controls
+   ----------------------------- */
+document.getElementById('markBtn').addEventListener('click', mark);
+
+document.getElementById('resetBtn').addEventListener('click', () => {
+  mcqOrder = [...MCQ.keys()];
+  shortOrder = [...SHORT.keys()];
+  renderAll();
+  window.scrollTo({top:0, behavior:'smooth'});
+});
+
+document.getElementById('shuffleBtn').addEventListener('click', () => {
+  mcqOrder = shuffle([...MCQ.keys()]);
+  shortOrder = shuffle([...SHORT.keys()]);
+  renderAll();
+  window.scrollTo({top:0, behavior:'smooth'});
+});
+
+function shuffle(arr){
+  for(let i = arr.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+// initial render
+renderAll();
+</script>
+</body>
+</html>
