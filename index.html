@@ -5,13 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>S2 Science Revision – Acids & Alkalis (Ch.9)</title>
 
-  <!-- PDF library (browser CDN) -->
-  <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
-
   <style>
     :root { --bg:#0b1220; --card:#121a2b; --text:#e8eefc; --muted:#a8b3d6; --accent:#6ea8fe; --good:#34d399; --bad:#fb7185; }
     body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:0;background:linear-gradient(180deg,#0b1220,#050814);color:var(--text);}
-    header{padding:18px 16px;border-bottom:1px solid rgba(255,255,255,.08);position:sticky;top:0;background:rgba(11,18,32,.92);backdrop-filter: blur(10px);}
+    header{padding:18px 16px;border-bottom:1px solid rgba(255,255,255,.08);position:sticky;top:0;background:rgba(11,18,32,.92);backdrop-filter: blur(10px);z-index:5;}
     h1{font-size:18px;margin:0 0 6px 0;}
     .sub{font-size:13px;color:var(--muted);margin:0;}
     main{max-width:980px;margin:0 auto;padding:16px;}
@@ -30,8 +27,6 @@
     .feedback{margin-top:8px;font-size:13px;color:var(--muted);}
     .good{color:var(--good);font-weight:700;}
     .bad{color:var(--bad);font-weight:700;}
-    .grid2{display:grid;grid-template-columns:1fr;gap:10px;}
-    @media (min-width:900px){ .grid2{grid-template-columns:1fr 1fr;} }
     details{border:1px solid rgba(255,255,255,.10);border-radius:12px;padding:10px;background:rgba(255,255,255,.02);}
     summary{cursor:pointer;color:var(--muted);font-weight:700;}
     footer{padding:14px 16px;color:var(--muted);font-size:12px;text-align:center;}
@@ -39,13 +34,30 @@
     .hint{font-size:12px;color:var(--muted);margin-top:8px;}
     .req{color:var(--bad);font-weight:800;}
     .left{justify-content:flex-start;}
+
+    /* Submission screen (full screen overlay) */
+    .overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);display:none;align-items:flex-start;justify-content:center;padding:18px;z-index:50;overflow:auto;}
+    .overlay.show{display:flex;}
+    .sheet{width:min(900px,100%);background:#ffffff;color:#0b1220;border-radius:16px;border:1px solid rgba(0,0,0,.12);padding:16px;}
+    .sheet h2{margin:0 0 6px 0;font-size:18px;}
+    .sheet .sub2{margin:0 0 12px 0;color:#334155;font-size:13px;}
+    .sheet .bar{display:flex;gap:10px;flex-wrap:wrap;justify-content:space-between;align-items:center;margin:10px 0 12px 0;}
+    .sheet .tag{font-size:12px;border:1px solid rgba(0,0,0,.18);border-radius:999px;padding:6px 10px;color:#111827;background:#f8fafc;}
+    .sheet .btn2{background:#2563eb;color:white;border:0;border-radius:12px;padding:10px 12px;font-weight:800;cursor:pointer;}
+    .sheet .btn2.secondary{background:white;color:#0b1220;border:1px solid rgba(0,0,0,.18);}
+    .sheet .box{border:1px solid rgba(0,0,0,.14);border-radius:12px;padding:10px;background:#f8fafc;}
+    .sheet .wrong{border-left:6px solid #ef4444;padding-left:10px;margin:10px 0;}
+    .sheet .ok{border-left:6px solid #16a34a;padding-left:10px;margin:10px 0;}
+    .sheet .small{font-size:12px;color:#334155;}
+    .sheet .qline{font-size:13px;margin:6px 0;}
+    .sheet .ansline{font-size:13px;margin:2px 0;}
   </style>
 </head>
 
 <body>
 <header>
   <h1>S2 Science – Revision Exercise: Acids & Alkalis (Ch.9)</h1>
-  <p class="sub">30 MCQ (A–D) + 20 short answers • Auto-marking • PDF report • HK S2 Science</p>
+  <p class="sub">30 MCQ (A–D) + 20 short answers • Marking + Submission Screen • HK S2 Science</p>
 </header>
 
 <main>
@@ -75,8 +87,8 @@
     <div class="row">
       <div class="pill" id="statsPill">Not started</div>
       <div class="row">
-        <button class="btn secondary" id="shuffleBtn" type="button">Shuffle questions</button>
-        <button class="btn" id="markBtn" type="button" disabled>Mark & show score + PDF</button>
+        <button class="btn" id="markBtn" type="button" disabled>Mark & show score</button>
+        <button class="btn secondary" id="submitBtn" type="button" style="display:none;">Submission</button>
         <button class="btn danger" id="resetBtn" type="button">Reset</button>
       </div>
     </div>
@@ -97,20 +109,44 @@
 
   <section class="card">
     <h2 style="font-size:16px;margin:0 0 8px 0;">Results</h2>
-    <div class="grid2">
-      <div class="q">
-        <h3>Score</h3>
-        <div id="scoreBox" class="mono">—</div>
-        <div id="scoreNote" class="feedback"></div>
+    <div class="q">
+      <h3>Score</h3>
+      <div id="scoreBox" class="mono">—</div>
+      <div id="scoreNote" class="feedback"></div>
+      <div class="hint" id="afterMarkHint" style="display:none;">
+        Tap <strong>Submission</strong> to open the screen for screenshot homework submission.
       </div>
-      <details>
-        <summary>Show answer key</summary>
-        <div id="keyBox" class="mono" style="white-space:pre-wrap;margin-top:10px;"></div>
-      </details>
     </div>
+    <details>
+      <summary>Show answer key</summary>
+      <div id="keyBox" class="mono" style="white-space:pre-wrap;margin-top:10px;"></div>
+    </details>
   </section>
 
 </main>
+
+<!-- Submission Screen Overlay -->
+<div class="overlay" id="overlay">
+  <div class="sheet" id="submissionSheet">
+    <h2>Screen capture and submit the image file to TEAMS</h2>
+    <p class="sub2">After checking, take a screenshot of this page and submit it as an image (JPG/PNG) in Teams.</p>
+
+    <div class="bar">
+      <div class="tag" id="tagStudent">Student: —</div>
+      <div class="tag" id="tagScore">Score: —</div>
+      <div class="tag" id="tagTime">Time: —</div>
+    </div>
+
+    <div class="box">
+      <div class="small"><strong>Wrong answers only</strong> (If none, it means all correct.)</div>
+      <div id="wrongList"></div>
+    </div>
+
+    <div class="bar" style="justify-content:flex-end;margin-top:12px;">
+      <button class="btn2 secondary" id="closeOverlayBtn" type="button">Back</button>
+    </div>
+  </div>
+</div>
 
 <footer>
   Content aligned to S2 “Acids & Alkalis” topics (properties, indicators, pH, neutralization, reactions, hazards, acid rain) [file:1]
@@ -118,7 +154,7 @@
 
 <script>
 /* -----------------------------
-   Question data
+   Question data (30 MCQ + 20 Short)
    ----------------------------- */
 const MCQ = [
   {q:"Which is a common property of acids?", options:["They feel slippery.","They have a sour taste.","They turn red litmus paper blue.","They have pH greater than 7."], ans:"B", exp:"Acids have a sour taste; NEVER taste lab acids [file:1]."},
@@ -149,7 +185,9 @@ const MCQ = [
   {q:"Rainwater is naturally slightly acidic because…", options:["it contains sodium hydroxide","carbon dioxide dissolves to form carbonic acid","it contains ammonia","it contains limestone"], ans:"B", exp:"CO₂ dissolves slightly in rainwater forming carbonic acid [file:1]."},
   {q:"A pH meter is better than pH paper because it…", options:["is always cheaper","gives more accurate readings","cannot be reused","cannot measure dark liquids"], ans:"B", exp:"A pH meter measures pH more accurately and can be reused [file:1]."},
   {q:"Which statement is correct?", options:["Lower pH means less acidic.","Higher pH means more acidic.","Lower pH means more acidic.","Neutral solutions have pH 0."], ans:"C", exp:"Lower pH = more acidic; higher pH = more alkaline [file:1]."},
-  {q:"Which is TRUE about hazards?", options:["Strong acids/alkalis are less corrosive than weak ones.","Concentrated acids/alkalis are more corrosive.","Household cleaners are always harmless.","Goggles are unnecessary for dilute solutions."], ans:"B", exp:"Strong/concentrated acids and alkalis are more corrosive and hazardous [file:1]."}
+  {q:"Which is TRUE about hazards?", options:["Strong acids/alkalis are less corrosive than weak ones.","Concentrated acids/alkalis are more corrosive.","Household cleaners are always harmless.","Goggles are unnecessary for dilute solutions."], ans:"B", exp:"Strong/concentrated acids and alkalis are more corrosive and hazardous [file:1]."},
+  /* MCQ 30 (added) */
+  {q:"Which pH value represents the most acidic solution?", options:["pH 2","pH 6","pH 8","pH 12"], ans:"A", exp:"Lower pH means more acidic [file:1]."}
 ];
 
 const SHORT = [
@@ -162,21 +200,21 @@ const SHORT = [
   {q:"What colour does red litmus turn in an alkali?", answers:["blue"], exp:"Alkali turns red litmus blue [file:1]."},
   {q:"Give one example of an acid found at home.", answers:["vinegar","lemon juice","soft drinks","yoghurt","tea","orange juice"], exp:"Many foods/drinks contain acids e.g. vinegar (ethanoic acid) [file:1]."},
   {q:"Give one example of an alkali found at home.", answers:["soap","baking soda","toothpaste","glass cleaner","kitchen cleaner","drain cleaner"], exp:"Many household products contain alkalis e.g. soap/cleaners [file:1]."},
-  {q:"Name one safety item worn to protect eyes in the lab.", answers:["safety goggles","goggles"], exp:"Safety goggles protect eyes when handling corrosive chemicals [file:1]."},
+  {q:"Name one safety item worn to protect eyes in the lab.", answers:["safety goggles","goggles"], exp:"Safety goggles protect eyes [file:1]."},
   {q:"If acid gets into the eye, what should you do first?", answers:["wash with eye wash","use eye wash bottle","rinse with water","wash with water"], exp:"Wash immediately with eyewash/water (~10 minutes) and report to teacher [file:1]."},
-  {q:"Acid + metal produces salt and what gas?", answers:["hydrogen","hydrogen gas"], exp:"Acid reacts with some metals to produce hydrogen [file:1]."},
+  {q:"Acid + metal produces salt and what gas?", answers:["hydrogen","hydrogen gas"], exp:"Acid + metal produces hydrogen [file:1]."},
   {q:"How do you test for hydrogen gas?", answers:["burning splint pop","pop sound","squeaky pop","lighted splint pop"], exp:"Hydrogen gives a pop with a burning splint [file:1]."},
-  {q:"Acid + carbonate produces salt, water and what gas?", answers:["carbon dioxide","carbon dioxide gas","co2"], exp:"Acid + carbonate → salt + carbon dioxide + water [file:1]."},
+  {q:"Acid + carbonate produces salt, water and what gas?", answers:["carbon dioxide","carbon dioxide gas","co2"], exp:"Acid + carbonate produces carbon dioxide [file:1]."},
   {q:"How do you test for carbon dioxide?", answers:["limewater turns milky","turn limewater milky","limewater milky"], exp:"CO₂ turns limewater milky [file:1]."},
   {q:"Name TWO gases that cause acid rain.", answers:["sulphur dioxide and nitrogen oxides","sulfur dioxide and nitrogen oxides","so2 and nitrogen oxides","sulphur dioxide, nitrogen oxides"], exp:"SO₂ and nitrogen oxides lead to acid rain [file:1]."},
-  {q:"State ONE effect of acid rain.", answers:["corrodes metals","damages plants","harms aquatic life","corrodes building materials","water pollution"], exp:"Acid rain corrodes materials and harms living things [file:1]."},
-  {q:"What is the main purpose of using toothpaste to prevent tooth decay (in one phrase)?", answers:["neutralize acids","neutralise acids","neutralize acid","neutralise acid"], exp:"Toothpaste is slightly alkaline to neutralize acids [file:1]."},
-  {q:"What is the term for the reaction when an acid and an alkali are mixed?", answers:["neutralization","neutralisation"], exp:"Acid + alkali reaction is neutralization [file:1]."},
+  {q:"State ONE effect of acid rain.", answers:["corrodes metals","damages plants","harms aquatic life","corrodes building materials","water pollution"], exp:"Acid rain damages materials and living things [file:1]."},
+  {q:"What is the main purpose of using toothpaste to prevent tooth decay (in one phrase)?", answers:["neutralize acids","neutralise acids","neutralize acid","neutralise acid"], exp:"Toothpaste (slightly alkaline) neutralizes acids [file:1]."},
+  {q:"What is the term for the reaction when an acid and an alkali are mixed?", answers:["neutralization","neutralisation"], exp:"This reaction is neutralization [file:1]."},
   {q:"A solution with pH 2 is (acidic/alkaline/neutral)?", answers:["acidic","acid"], exp:"pH < 7 means acidic [file:1]."}
 ];
 
 /* -----------------------------
-   State
+   State + DOM
    ----------------------------- */
 const mcqBox = document.getElementById('mcq');
 const shortBox = document.getElementById('short');
@@ -184,10 +222,20 @@ const scoreBox = document.getElementById('scoreBox');
 const scoreNote = document.getElementById('scoreNote');
 const keyBox = document.getElementById('keyBox');
 const statsPill = document.getElementById('statsPill');
+
 const markBtn = document.getElementById('markBtn');
+const submitBtn = document.getElementById('submitBtn');
+const afterMarkHint = document.getElementById('afterMarkHint');
+
+const overlay = document.getElementById('overlay');
+const wrongList = document.getElementById('wrongList');
+const tagStudent = document.getElementById('tagStudent');
+const tagScore = document.getElementById('tagScore');
+const tagTime = document.getElementById('tagTime');
 
 let mcqOrder = [...MCQ.keys()];
 let shortOrder = [...SHORT.keys()];
+let lastMark = null; // store results for Submission screen
 
 /* -----------------------------
    Utils
@@ -204,22 +252,16 @@ function norm(s){
     .replaceAll('–','-')
     .replace(/\s+/g,' ');
 }
-function shuffle(arr){
-  for(let i = arr.length - 1; i > 0; i--){
-    const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
-  }
-  return arr;
+function studentInfo(){
+  return {
+    c: document.getElementById('stuClass')?.value?.trim() || '',
+    n: document.getElementById('stuNo')?.value?.trim() || '',
+    nm: document.getElementById('stuName')?.value?.trim() || ''
+  };
 }
-function isIOS(){
-  return /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-}
-function safeFilePart(s){
-  return (s ?? "")
-    .toString()
-    .trim()
-    .replace(/[^\w\-]+/g, "_")
-    .slice(0, 40);
+function studentInfoOk(){
+  const s = studentInfo();
+  return Boolean(s.c && s.n && s.nm);
 }
 
 /* -----------------------------
@@ -230,7 +272,11 @@ function renderAll(){
   shortBox.innerHTML = '';
   scoreBox.textContent = '—';
   scoreNote.textContent = '';
-  statsPill.textContent = `MCQ: 30 • Short: 20 • Total: 50`;
+  submitBtn.style.display = 'none';
+  afterMarkHint.style.display = 'none';
+  lastMark = null;
+
+  statsPill.textContent = `MCQ: ${MCQ.length} • Short: ${SHORT.length} • Total: ${MCQ.length + SHORT.length}`;
 
   mcqOrder.forEach((idx, i) => {
     const item = MCQ[idx];
@@ -274,18 +320,13 @@ function renderAll(){
 /* -----------------------------
    Student info gating
    ----------------------------- */
-function studentInfoOk(){
-  const c = document.getElementById('stuClass')?.value?.trim() || '';
-  const n = document.getElementById('stuNo')?.value?.trim() || '';
-  const nm = document.getElementById('stuName')?.value?.trim() || '';
-  return Boolean(c && n && nm);
-}
 function updateMarkBtnState(){
   const ok = studentInfoOk();
   markBtn.disabled = !ok;
+
   const hint = document.getElementById('stuHint');
   if(ok){
-    hint.innerHTML = `<span class="good">OK.</span> You can mark and generate PDF.`;
+    hint.innerHTML = `<span class="good">OK.</span> You can mark now.`;
   }else{
     hint.innerHTML = `Fill in all fields to enable “Mark & show score”.`;
   }
@@ -295,19 +336,19 @@ function updateMarkBtnState(){
 });
 
 /* -----------------------------
-   Build results details (for PDF)
+   Build results for Submission screen
    ----------------------------- */
 function buildResultsDetails(){
   const details = [];
 
-  // MCQ details (all 30)
+  // MCQ
   mcqOrder.forEach((idx, i) => {
     const item = MCQ[idx];
     const name = `mcq_${idx}`;
     const chosen = document.querySelector(`input[name="${name}"]:checked`);
     details.push({
       section: "MCQ",
-      no: i+1,
+      displayNo: i+1,
       question: item.q,
       student: chosen ? chosen.value : "(blank)",
       correct: item.ans,
@@ -315,7 +356,7 @@ function buildResultsDetails(){
     });
   });
 
-  // Short details (all 20)
+  // Short
   shortOrder.forEach((idx, i) => {
     const item = SHORT[idx];
     const id = `short_${idx}`;
@@ -326,7 +367,7 @@ function buildResultsDetails(){
 
     details.push({
       section: "Short",
-      no: i+1,
+      displayNo: i+1,
       question: item.q,
       student: val.trim() ? val.trim() : "(blank)",
       correct: item.answers[0],
@@ -338,96 +379,9 @@ function buildResultsDetails(){
 }
 
 /* -----------------------------
-   PDF generation (all 50 questions)
+   Marking
    ----------------------------- */
-async function generatePdfReport({stuClass, stuNo, stuName, mcqCorrect, shortCorrect, total, details}){
-  const { PDFDocument, StandardFonts, rgb } = PDFLib;
-
-  const pdfDoc = await PDFDocument.create();
-  const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
-  const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
-
-  const now = new Date();
-  const title = "S2 Science – Acids & Alkalis Revision Results";
-
-  // A4 portrait in points
-  const pageSize = [595.28, 841.89];
-  const margin = 38;
-  let page = pdfDoc.addPage(pageSize);
-  let y = page.getHeight() - margin;
-
-  function newPage(){
-    page = pdfDoc.addPage(pageSize);
-    y = page.getHeight() - margin;
-  }
-
-  function drawText(txt, size=11, bold=false, color=rgb(0,0,0)){
-    if (y < margin + 60) newPage();
-    page.drawText(String(txt), { x: margin, y, size, font: bold ? fontBold : font, color });
-    y -= (size + 4);
-  }
-
-  function drawWrapped(label, text, size=10, maxChars=95, color=rgb(0.15,0.15,0.15)){
-    const full = `${label}${text}`;
-    for(let i=0;i<full.length;i+=maxChars){
-      drawText(full.slice(i, i+maxChars), size, false, color);
-    }
-  }
-
-  // Header
-  drawText(title, 15, true, rgb(0.05,0.1,0.2));
-  drawText(`Generated: ${now.toLocaleString()}`, 10, false, rgb(0.25,0.25,0.25));
-  drawText(`Class: ${stuClass}   Class No.: ${stuNo}   Name: ${stuName}`, 11, true, rgb(0.05,0.1,0.2));
-
-  const score = mcqCorrect + shortCorrect;
-  drawText(`Overall score: ${score}/${total}   (MCQ ${mcqCorrect}/30, Short ${shortCorrect}/20)`, 12, true, rgb(0.05,0.1,0.2));
-
-  drawText(isIOS()
-    ? "iPad/iPhone: If it opens as preview, use Share → Save to Files / Send to Teams."
-    : "If download does not start, check your browser download settings.",
-    9, false, rgb(0.35,0.35,0.35)
-  );
-
-  y -= 6;
-  drawText("Question-by-question results (all 50 questions)", 12, true, rgb(0.05,0.1,0.2));
-  y -= 2;
-
-  // Results list
-  for(const r of details){
-    const status = r.ok ? "✓" : "✗";
-    const color = r.ok ? rgb(0.0,0.45,0.2) : rgb(0.65,0.0,0.1);
-
-    drawText(`${r.section} ${r.no}. ${status}  Your: ${r.student}   Correct: ${r.correct}`, 10, true, color);
-    drawWrapped("Q: ", r.question, 9, 105, rgb(0.25,0.25,0.25));
-    y -= 4;
-  }
-
-  const pdfBytes = await pdfDoc.save();
-  const blob = new Blob([pdfBytes], { type: "application/pdf" });
-  const url = URL.createObjectURL(blob);
-
-  const filename = `Acids_Alkalis_Result_${safeFilePart(stuClass)}_${safeFilePart(stuNo)}_${safeFilePart(stuName)}.pdf`;
-
-  // Try download (works on many platforms). iOS Safari may preview instead.
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-
-  // iOS fallback: open so students can Share/Save/Teams.
-  if (isIOS()){
-    window.open(url, "_blank");
-  }
-
-  setTimeout(() => URL.revokeObjectURL(url), 60_000);
-}
-
-/* -----------------------------
-   Marking + feedback + PDF
-   ----------------------------- */
-async function mark(){
+function mark(){
   if(!studentInfoOk()){
     alert("Please fill in Class, Class No., and Name first.");
     updateMarkBtnState();
@@ -436,7 +390,7 @@ async function mark(){
 
   let mcqCorrect = 0, shortCorrect = 0;
 
-  // MCQ marking
+  // MCQ
   mcqOrder.forEach((idx) => {
     const item = MCQ[idx];
     const id = `mcq_${idx}`;
@@ -455,7 +409,7 @@ async function mark(){
     }
   });
 
-  // Short marking
+  // Short
   shortOrder.forEach((idx) => {
     const item = SHORT[idx];
     const id = `short_${idx}`;
@@ -474,9 +428,9 @@ async function mark(){
     }
   });
 
-  const total = 50;
+  const total = MCQ.length + SHORT.length;
   const score = mcqCorrect + shortCorrect;
-  scoreBox.textContent = `${score}/${total}  (MCQ ${mcqCorrect}/30, Short ${shortCorrect}/20)`;
+  scoreBox.textContent = `${score}/${total}  (MCQ ${mcqCorrect}/${MCQ.length}, Short ${shortCorrect}/${SHORT.length})`;
 
   if(score >= 45) scoreNote.innerHTML = `<span class="good">Excellent.</span> Ready for unit test-level questions.`;
   else if(score >= 35) scoreNote.innerHTML = `<span class="good">Good.</span> Review mistakes and redo.`;
@@ -484,44 +438,90 @@ async function mark(){
 
   statsPill.textContent = `Done • Score: ${score}/${total}`;
 
-  // Generate PDF with all 50 questions
-  const stuClass = document.getElementById('stuClass').value.trim();
-  const stuNo = document.getElementById('stuNo').value.trim();
-  const stuName = document.getElementById('stuName').value.trim();
+  // Save result for submission screen (wrong answers only will be displayed there)
+  const s = studentInfo();
   const details = buildResultsDetails();
+  const wrongOnly = details.filter(d => !d.ok);
 
-  await generatePdfReport({
-    stuClass, stuNo, stuName,
-    mcqCorrect, shortCorrect,
+  lastMark = {
+    student: s,
+    score,
     total,
-    details
-  });
+    mcqCorrect,
+    shortCorrect,
+    wrongOnly,
+    time: new Date()
+  };
+
+  // Show submission button
+  submitBtn.style.display = 'inline-block';
+  afterMarkHint.style.display = 'block';
+}
+
+/* -----------------------------
+   Submission Screen
+   ----------------------------- */
+function openSubmission(){
+  if(!lastMark){
+    alert("Please mark first.");
+    return;
+  }
+
+  const { student, score, total, wrongOnly, time } = lastMark;
+
+  tagStudent.textContent = `Student: ${student.c} (${student.n}) ${student.nm}`;
+  tagScore.textContent = `Score: ${score}/${total}`;
+  tagTime.textContent = `Time: ${time.toLocaleString()}`;
+
+  wrongList.innerHTML = "";
+
+  if(wrongOnly.length === 0){
+    const div = document.createElement('div');
+    div.className = "ok";
+    div.innerHTML = `
+      <div class="qline"><strong>All answers are correct.</strong></div>
+      <div class="small">You can screenshot this page and submit to Teams.</div>
+    `;
+    wrongList.appendChild(div);
+  }else{
+    wrongOnly.forEach((r) => {
+      const div = document.createElement('div');
+      div.className = "wrong";
+      div.innerHTML = `
+        <div class="qline"><strong>${escapeHtml(r.section)} ${r.displayNo}</strong> — ${escapeHtml(r.question)}</div>
+        <div class="ansline"><strong>Your answer:</strong> <span class="mono">${escapeHtml(r.student)}</span></div>
+        <div class="ansline"><strong>Correct answer:</strong> <span class="mono">${escapeHtml(r.correct)}</span></div>
+      `;
+      wrongList.appendChild(div);
+    });
+  }
+
+  overlay.classList.add('show');
+  // move to top of overlay for screenshot convenience
+  overlay.scrollTop = 0;
+}
+function closeSubmission(){
+  overlay.classList.remove('show');
 }
 
 /* -----------------------------
    Buttons
    ----------------------------- */
-document.getElementById('markBtn').addEventListener('click', async () => {
-  markBtn.disabled = true; // prevent double click while generating PDF
-  try{
-    await mark();
-  }finally{
-    updateMarkBtnState(); // re-enable if student info still ok
-  }
+markBtn.addEventListener('click', () => {
+  mark();
+});
+
+submitBtn.addEventListener('click', openSubmission);
+document.getElementById('closeOverlayBtn').addEventListener('click', closeSubmission);
+
+// Tap outside the sheet to close (optional)
+overlay.addEventListener('click', (e) => {
+  if(e.target === overlay) closeSubmission();
 });
 
 document.getElementById('resetBtn').addEventListener('click', () => {
   mcqOrder = [...MCQ.keys()];
   shortOrder = [...SHORT.keys()];
-  // keep student info as-is (teacher preference); clear score+feedback by rerender
-  renderAll();
-  updateMarkBtnState();
-  window.scrollTo({top:0, behavior:'smooth'});
-});
-
-document.getElementById('shuffleBtn').addEventListener('click', () => {
-  mcqOrder = shuffle([...MCQ.keys()]);
-  shortOrder = shuffle([...SHORT.keys()]);
   renderAll();
   updateMarkBtnState();
   window.scrollTo({top:0, behavior:'smooth'});
